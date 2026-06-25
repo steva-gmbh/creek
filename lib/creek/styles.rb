@@ -14,8 +14,9 @@ module Creek
 
     def styles_xml
       @styles_xml ||= if @book.files.file.exist?(path)
-                        doc = @book.files.file.open path
-                        Nokogiri::XML::Document.parse doc
+                        @book.files.file.open(path) do |doc|
+                          Nokogiri::XML::Document.parse(doc)
+                        end
                       end
     end
 

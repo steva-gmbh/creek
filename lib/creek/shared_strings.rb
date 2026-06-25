@@ -18,9 +18,10 @@ module Creek
       path = 'xl/sharedStrings.xml'
       return unless @book.files.file.exist?(path)
 
-      doc = @book.files.file.open path
-      xml = Nokogiri::XML::Document.parse doc
-      parse_shared_string_from_document(xml)
+      @book.files.file.open(path) do |doc|
+        xml = Nokogiri::XML::Document.parse(doc)
+        parse_shared_string_from_document(xml)
+      end
     end
 
     def parse_shared_string_from_document(xml)

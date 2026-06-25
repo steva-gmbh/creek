@@ -11,8 +11,9 @@ module Creek
     end
 
     def parse_xml(xml_path)
-      doc = @book.files.file.open(xml_path)
-      Nokogiri::XML::Document.parse(doc)
+      @book.files.file.open(xml_path) do |doc|
+        Nokogiri::XML::Document.parse(doc)
+      end
     end
   end
 end

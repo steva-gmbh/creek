@@ -28,8 +28,7 @@ module Creek
 
     def sheets
       @sheets ||= begin
-        doc = @files.file.open 'xl/workbook.xml'
-        xml = Nokogiri::XML::Document.parse doc
+        xml = @files.file.open('xl/workbook.xml') { |doc| Nokogiri::XML::Document.parse(doc) }
         namespaces = xml.namespaces
 
         css_prefix = ''
@@ -37,8 +36,9 @@ module Creek
           css_prefix = namespace[0].split(':')[1] + '|' if namespace[1] == 'http://schemas.openxmlformats.org/spreadsheetml/2006/main' && namespace[0] != 'xmlns'
         end
 
-        rels_doc = @files.file.open 'xl/_rels/workbook.xml.rels'
-        rels = Nokogiri::XML::Document.parse(rels_doc).css('Relationship')
+        rels = @files.file.open('xl/_rels/workbook.xml.rels') do |doc|
+          Nokogiri::XML::Document.parse(doc).css('Relationship')
+        end
         xml.css(css_prefix + 'sheet').map do |sheet|
           sheetfile = rels.find { |el| sheet.attr('r:id') == el.attr('Id') }.attr('Target')
           sheet = Sheet.new(
@@ -72,8 +72,7 @@ module Creek
           # http://msdn.microsoft.com/en-us/library/ff530155(v=office.12).aspx
           result = DATE_1900 # default
 
-          doc = @files.file.open 'xl/workbook.xml'
-          xml = Nokogiri::XML::Document.parse doc
+          xml = @files.file.open('xl/workbook.xml') { |doc| Nokogiri::XML::Document.parse(doc) }
           xml.css('workbookPr[date1904]').each do |workbook_pr|
             if workbook_pr['date1904'] =~ /true|1/i
               result = DATE_1904

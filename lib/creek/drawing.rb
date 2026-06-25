@@ -38,7 +38,9 @@ module Creek
       pathnames_at_coordinate.map do |image_pathname|
         unless image_pathname.exist?
           excel_image_path = "xl/media#{image_pathname.to_path.split(tmpdir).last}"
-          IO.copy_stream(@book.files.file.open(excel_image_path), image_pathname.to_path)
+          @book.files.file.open(excel_image_path) do |input|
+            IO.copy_stream(input, image_pathname.to_path)
+          end
         end
         image_pathname
       end
