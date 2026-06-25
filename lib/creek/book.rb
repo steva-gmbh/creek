@@ -61,6 +61,7 @@ module Creek
     end
 
     def close
+      @sheets&.each(&:cleanup)
       @files.close
     end
 

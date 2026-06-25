@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'pathname'
+require 'fileutils'
 
 module Creek
   class Creek::Drawing
@@ -25,6 +26,15 @@ module Creek
     # Returns false if there are no images in the drawing file or the drawing file does not exist, true otherwise.
     def has_images?
       @has_images ||= !@drawings.empty?
+    end
+
+    ##
+    # Removes the temporary directory used for extracted images.
+    def cleanup
+      return unless @tmpdir
+
+      FileUtils.remove_entry(@tmpdir) if File.directory?(@tmpdir)
+      @tmpdir = nil
     end
 
     ##

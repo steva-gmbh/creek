@@ -45,6 +45,12 @@ module Creek
     end
 
     ##
+    # Removes temporary resources created for image extraction.
+    def cleanup
+      @drawing&.cleanup
+    end
+
+    ##
     # Extracts images for a cell to a temporary folder.
     # Returns array of Pathnames for the cell.
     # Returns nil if images asre not found for the cell or images were not preloaded with #with_images.
