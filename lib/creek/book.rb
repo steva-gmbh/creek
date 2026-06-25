@@ -63,6 +63,8 @@ module Creek
     def close
       @sheets&.each(&:cleanup)
       @files.close
+      @remote_tempfile&.close
+      @remote_tempfile = nil
     end
 
     def base_date
@@ -92,10 +94,11 @@ module Creek
       # threshold, and a Tempfile if over.
       downloaded = URI(url).open
       if downloaded.is_a? StringIO
-        path = Tempfile.new(['creek-file', '.xlsx']).path
-        File.binwrite(path, downloaded.read)
-        path
+        @remote_tempfile = Tempfile.new(['creek-file', '.xlsx'])
+        File.binwrite(@remote_tempfile.path, downloaded.read)
+        @remote_tempfile.path
       else
+        @remote_tempfile = downloaded
         downloaded.path
       end
     end
