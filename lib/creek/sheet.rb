@@ -99,20 +99,23 @@ module Creek
       # one to open the element and one to close it.
       opener = Nokogiri::XML::Reader::TYPE_ELEMENT
       closer = Nokogiri::XML::Reader::TYPE_END_ELEMENT
-      Enumerator.new do |y|
+      io_ref = []
+      enum = Enumerator.new do |y|
         @headers = nil
         row = nil
         cells = {}
         cell = nil
         cell_type = nil
         cell_style_idx = nil
-        @book.files.file.open(path) do |xml|
+        io = @book.files.file.open(path)
+        io_ref[0] = io
+        begin
           prefix = ''
           name_row = 'row'
           name_c = 'c'
           name_v = 'v'
           name_t = 't'
-          Nokogiri::XML::Reader.from_io(xml).each do |node|
+          Nokogiri::XML::Reader.from_io(io).each do |node|
             next unless node.namespace_uri == SPREADSHEETML_URI
             if prefix.empty? && node.prefix
               prefix = node.prefix
@@ -152,8 +155,13 @@ module Creek
               end
             end
           end
+        ensure
+          io.close
+          io_ref[0] = nil
         end
       end
+      ObjectSpace.define_finalizer(enum, proc { io_ref[0]&.close })
+      enum
     end
 
     def convert(value, type, style_idx)
